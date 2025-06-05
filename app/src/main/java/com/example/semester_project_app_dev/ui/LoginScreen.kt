@@ -1,5 +1,6 @@
 package com.example.semester_project_app_dev.ui
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -22,13 +23,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.platform.LocalContext
 import com.example.semester_project_app_dev.R
+import com.example.semester_project_app_dev.data.AppDatabase
+import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(
     onLogin: (name: String, surname: String, password: String) -> Unit = { _, _, _ -> },
     onBack: () -> Unit = {}
 ) {
+    val context = LocalContext.current
+    val db = remember { AppDatabase.getInstance(context) }
+    val scope = rememberCoroutineScope()
+
     var name by rememberSaveable { mutableStateOf("") }
     var surname by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
@@ -36,7 +44,7 @@ fun LoginScreen(
     val notebookPainter = painterResource(R.drawable.bg_notebook)
     val welcomePainter = painterResource(R.drawable.img_welcome)
     val pencilPainter = painterResource(R.drawable.img_pencil)
-    val backPainter = painterResource(R.drawable.log_in) // ← Add your own back icon to res/drawable
+    val backPainter = painterResource(R.drawable.img_home_btn) // ← Add your own back icon to res/drawable
 
     Box(modifier = Modifier.fillMaxSize()) {
         // Background image
@@ -48,15 +56,15 @@ fun LoginScreen(
         )
 
         // Back button (top-left corner)
-        //Image(
-        //    painter = backPainter,
-        //    contentDescription = "Back",
-            //    modifier = Modifier
-            //        .padding(15.dp)
-            //        .size(75.dp)
-            //        .align(Alignment.TopStart)
-        //        .clickable(onClick = onBack)
-        //)
+            Image(
+                painter = backPainter,
+                contentDescription = "Back",
+                    modifier = Modifier
+                        .padding(15.dp)
+                        .size(30.dp)
+                        .align(Alignment.TopStart)
+                    .clickable(onClick = onBack)
+            )
 
         // Main content
         Column(
@@ -109,7 +117,16 @@ fun LoginScreen(
                     PressableImage(
                         imageRes = R.drawable.log_in,
                         contentDescription = "Log in",
-                        onClick = { onLogin(name, surname, password) },
+                        onClick = {
+                            scope.launch {
+                                val user = db.userDao().authenticate(name, surname, password)
+                                if (user != null) {
+                                    onLogin(name, surname, password)
+                                } else {
+                                    Toast.makeText(context, "Invalid credentials", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        },
                         modifier = Modifier.height(48.dp)
                     )
                 } else {

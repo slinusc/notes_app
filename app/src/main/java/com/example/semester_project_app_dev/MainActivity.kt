@@ -30,7 +30,7 @@ class MainActivity : ComponentActivity() {
                     )
 
                     "signup" -> SignUpScreen(
-                        onSignUp = { name, surname, school, year, semester, password ->
+                        onSignUp = { name, surname, school, semester, password ->
                             // Handle sign-up here
                             currentScreen = "start" // or navigate elsewhere
                         }

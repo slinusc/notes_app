@@ -12,19 +12,29 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.example.semester_project_app_dev.R
 
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
+import com.example.semester_project_app_dev.data.AppDatabase
+import com.example.semester_project_app_dev.data.User
+import kotlinx.coroutines.launch
+
+
 @Composable
 fun SignUpScreen(
-    onSignUp: (name: String, surname: String, school: String, year: String, semester: String, password: String) -> Unit = { _, _, _, _, _, _ -> }
+    onSignUp: (name: String, surname: String, school: String, semester: String, password: String) -> Unit = { _, _, _, _, _ -> }
 ) {
     var name by rememberSaveable { mutableStateOf("") }
     var surname by rememberSaveable { mutableStateOf("") }
     var school by rememberSaveable { mutableStateOf("") }
-    var year by rememberSaveable { mutableStateOf("") }
     var semester by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
 
+    val context = LocalContext.current
+    val db = remember { AppDatabase.getInstance(context) }
+    val scope = rememberCoroutineScope()
+
     val notebookPainter = painterResource(R.drawable.bg_notebook)
-    val welcomePainter = painterResource(R.drawable.img_welcome) // reuse or replace with "sign up" variant
+    val welcomePainter = painterResource(R.drawable.img_welcome_sign_in)
     val pencilPainter = painterResource(R.drawable.img_pencil)
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -61,7 +71,7 @@ fun SignUpScreen(
             TapedTextField(value = school, onValueChange = { school = it }, bgRes = R.drawable.artboard_46, placeholder = "School")
             Spacer(modifier = Modifier.height(16.dp))
 
-            TapedTextField(value = year, onValueChange = { year = it }, bgRes = R.drawable.artboard_48, placeholder = "Year")
+            TapedTextField(value = semester, onValueChange = { semester = it }, bgRes = R.drawable.artboard_48, placeholder = "Semester")
             Spacer(modifier = Modifier.height(16.dp))
 
             TapedTextField(
@@ -71,18 +81,33 @@ fun SignUpScreen(
                 placeholder = "Password",
                 isPassword = true
             )
+
             Spacer(modifier = Modifier.height(32.dp))
 
             Box(
                 modifier = Modifier.fillMaxWidth(),
                 contentAlignment = Alignment.Center
             ) {
-                val allFilled = listOf(name, surname, school, year, semester, password).all { it.isNotBlank() }
+                val allFilled = listOf(name, surname, school, semester, password).all { it.isNotBlank() }
                 if (allFilled) {
                     PressableImage(
                         imageRes = R.drawable.sign_up,
                         contentDescription = "Sign up",
-                        onClick = { onSignUp(name, surname, school, year, semester, password) },
+                        onClick = {
+                            scope.launch {
+                                val user = User(
+                                    name = name,
+                                    surname = surname,
+                                    school = school,
+                                    semester = semester,
+                                    password = password,
+                                )
+
+                                db.userDao().insertUser(user)
+                                Toast.makeText(context, "Account created!", Toast.LENGTH_SHORT).show()
+                                onSignUp(name, surname, school, semester, password)
+                            }
+                        },
                         modifier = Modifier
                             .width(180.dp)
                             .height(50.dp)
