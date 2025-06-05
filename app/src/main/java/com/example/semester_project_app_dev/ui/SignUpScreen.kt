@@ -13,15 +13,18 @@ import androidx.compose.ui.zIndex
 import com.example.semester_project_app_dev.R
 
 import android.widget.Toast
+import androidx.compose.foundation.clickable
 import androidx.compose.ui.platform.LocalContext
 import com.example.semester_project_app_dev.data.AppDatabase
 import com.example.semester_project_app_dev.data.User
 import kotlinx.coroutines.launch
+import android.util.Log
 
 
 @Composable
 fun SignUpScreen(
-    onSignUp: (name: String, surname: String, school: String, semester: String, password: String) -> Unit = { _, _, _, _, _ -> }
+    onSignUp: (name: String, surname: String, school: String, semester: String, password: String) -> Unit = { _, _, _, _, _ -> },
+    onBack: () -> Unit = {}
 ) {
     var name by rememberSaveable { mutableStateOf("") }
     var surname by rememberSaveable { mutableStateOf("") }
@@ -36,6 +39,7 @@ fun SignUpScreen(
     val notebookPainter = painterResource(R.drawable.bg_notebook)
     val welcomePainter = painterResource(R.drawable.img_welcome_sign_in)
     val pencilPainter = painterResource(R.drawable.img_pencil)
+    val backPainter = painterResource(R.drawable.back_arrow) // ← Add your own back icon to res/drawable
 
     Box(modifier = Modifier.fillMaxSize()) {
         Image(
@@ -43,6 +47,17 @@ fun SignUpScreen(
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()
+        )
+
+        // Back button (top-left corner)
+        Image(
+            painter = backPainter,
+            contentDescription = "Back",
+            modifier = Modifier
+                .padding(15.dp)
+                .size(30.dp)
+                .align(Alignment.TopStart)
+                .clickable(onClick = onBack)
         )
 
         Column(
@@ -62,23 +77,23 @@ fun SignUpScreen(
 
             Spacer(modifier = Modifier.height(120.dp))
 
-            TapedTextField(value = name, onValueChange = { name = it }, bgRes = R.drawable.bg_field_name, placeholder = "Name")
+            TapedTextField(value = name, onValueChange = { name = it }, bgRes = R.drawable.bg_field_name, placeholder = "")
             Spacer(modifier = Modifier.height(16.dp))
 
-            TapedTextField(value = surname, onValueChange = { surname = it }, bgRes = R.drawable.bg_field_surname, placeholder = "Surname")
+            TapedTextField(value = surname, onValueChange = { surname = it }, bgRes = R.drawable.bg_field_surname, placeholder = "")
             Spacer(modifier = Modifier.height(16.dp))
 
-            TapedTextField(value = school, onValueChange = { school = it }, bgRes = R.drawable.artboard_46, placeholder = "School")
+            TapedTextField(value = school, onValueChange = { school = it }, bgRes = R.drawable.artboard_46, placeholder = "")
             Spacer(modifier = Modifier.height(16.dp))
 
-            TapedTextField(value = semester, onValueChange = { semester = it }, bgRes = R.drawable.artboard_48, placeholder = "Semester")
+            TapedTextField(value = semester, onValueChange = { semester = it }, bgRes = R.drawable.artboard_48, placeholder = "")
             Spacer(modifier = Modifier.height(16.dp))
 
             TapedTextField(
                 value = password,
                 onValueChange = { password = it },
                 bgRes = R.drawable.bg_field_password,
-                placeholder = "Password",
+                placeholder = "",
                 isPassword = true
             )
 
@@ -94,19 +109,25 @@ fun SignUpScreen(
                         imageRes = R.drawable.sign_up,
                         contentDescription = "Sign up",
                         onClick = {
-                            scope.launch {
-                                val user = User(
-                                    name = name,
-                                    surname = surname,
-                                    school = school,
-                                    semester = semester,
-                                    password = password,
-                                )
+                                    scope.launch {
+                                        try {
+                                            val user = User(
+                                                name = name,
+                                                surname = surname,
+                                                school = school,
+                                                semester = semester,
+                                                password = password,
+                                            )
 
-                                db.userDao().insertUser(user)
-                                Toast.makeText(context, "Account created!", Toast.LENGTH_SHORT).show()
-                                onSignUp(name, surname, school, semester, password)
-                            }
+                                            db.userDao().insertUser(user)
+                                            Toast.makeText(context, "Account created!", Toast.LENGTH_SHORT).show()
+                                            onSignUp(name, surname, school, semester, password)
+                                        } catch (e: Exception) {
+                                            Log.e("SignUpScreen", "Error during sign up", e)
+                                            Toast.makeText(context, "Sign up failed: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
+                                        }
+                                    }
+
                         },
                         modifier = Modifier
                             .width(180.dp)

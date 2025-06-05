@@ -27,6 +27,7 @@ import androidx.compose.ui.platform.LocalContext
 import com.example.semester_project_app_dev.R
 import com.example.semester_project_app_dev.data.AppDatabase
 import kotlinx.coroutines.launch
+import android.util.Log
 
 @Composable
 fun LoginScreen(
@@ -44,7 +45,7 @@ fun LoginScreen(
     val notebookPainter = painterResource(R.drawable.bg_notebook)
     val welcomePainter = painterResource(R.drawable.img_welcome)
     val pencilPainter = painterResource(R.drawable.img_pencil)
-    val backPainter = painterResource(R.drawable.img_home_btn) // ← Add your own back icon to res/drawable
+    val backPainter = painterResource(R.drawable.back_arrow) // ← Add your own back icon to res/drawable
 
     Box(modifier = Modifier.fillMaxSize()) {
         // Background image
@@ -88,7 +89,7 @@ fun LoginScreen(
                 value = name,
                 onValueChange = { name = it },
                 bgRes = R.drawable.bg_field_name,
-                placeholder = "Name"
+                placeholder = ""
             )
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -96,7 +97,7 @@ fun LoginScreen(
                 value = surname,
                 onValueChange = { surname = it },
                 bgRes = R.drawable.bg_field_surname,
-                placeholder = "Surname"
+                placeholder = ""
             )
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -104,7 +105,7 @@ fun LoginScreen(
                 value = password,
                 onValueChange = { password = it },
                 bgRes = R.drawable.bg_field_password,
-                placeholder = "Password",
+                placeholder = "",
                 isPassword = true
             )
             Spacer(modifier = Modifier.height(32.dp))
@@ -118,14 +119,20 @@ fun LoginScreen(
                         imageRes = R.drawable.log_in,
                         contentDescription = "Log in",
                         onClick = {
-                            scope.launch {
-                                val user = db.userDao().authenticate(name, surname, password)
-                                if (user != null) {
-                                    onLogin(name, surname, password)
-                                } else {
-                                    Toast.makeText(context, "Invalid credentials", Toast.LENGTH_SHORT).show()
-                                }
-                            }
+                                    scope.launch {
+                                        try {
+                                            val user = db.userDao().authenticate(name, surname, password)
+                                            if (user != null) {
+                                                onLogin(name, surname, password)
+                                            } else {
+                                                Toast.makeText(context, "Invalid credentials", Toast.LENGTH_SHORT).show()
+                                            }
+                                        } catch (e: Exception) {
+                                            Log.e("LoginScreen", "Login failed", e)
+                                            Toast.makeText(context, "Login error: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
+                                        }
+                                    }
+
                         },
                         modifier = Modifier.height(48.dp)
                     )
