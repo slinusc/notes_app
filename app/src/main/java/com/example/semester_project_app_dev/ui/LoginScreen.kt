@@ -161,49 +161,6 @@ fun LoginScreen(
 }
 
 
-
-@Composable
-fun TapedTextField(
-    value: String,
-    onValueChange: (String) -> Unit,
-    bgRes: Int,
-    placeholder: String,
-    modifier: Modifier = Modifier,
-    isPassword: Boolean = false
-) {
-    val bgPainter = painterResource(bgRes)
-
-    Box(modifier = modifier) {
-        Image(
-            painter = bgPainter,
-            contentDescription = null,
-            contentScale = ContentScale.Fit,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        BasicTextField(
-            value = value,
-            onValueChange = onValueChange,
-            singleLine = true,
-            visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None,
-            textStyle = MaterialTheme.typography.bodyLarge.copy(color = Color.DarkGray),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(80.dp)
-                .padding(start = 48.dp, end = 20.dp, top = 45.dp),
-            decorationBox = { innerTextField ->
-                if (value.isEmpty()) {
-                    Text(
-                        text = placeholder,
-                        style = MaterialTheme.typography.bodyLarge.copy(color = Color(0xFF6E6E6E))
-                    )
-                }
-                innerTextField()
-            }
-        )
-    }
-}
-
 @Preview(showBackground = true, widthDp = 360, heightDp = 800)
 @Composable
 private fun LoginScreenPreview2() {

@@ -12,13 +12,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.example.semester_project_app_dev.R
 
-import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.platform.LocalContext
 import com.example.semester_project_app_dev.data.AppDatabase
-import com.example.semester_project_app_dev.data.User
-import kotlinx.coroutines.launch
-import android.util.Log
 
 
 @Composable
@@ -83,10 +79,10 @@ fun SignUpScreen(
             TapedTextField(value = surname, onValueChange = { surname = it }, bgRes = R.drawable.bg_field_surname, placeholder = "")
             Spacer(modifier = Modifier.height(16.dp))
 
-            TapedTextField(value = school, onValueChange = { school = it }, bgRes = R.drawable.artboard_46, placeholder = "")
+            TapedTextField(value = school, onValueChange = { school = it }, bgRes = R.drawable.bg_school, placeholder = "")
             Spacer(modifier = Modifier.height(16.dp))
 
-            TapedTextField(value = semester, onValueChange = { semester = it }, bgRes = R.drawable.artboard_48, placeholder = "")
+            TapedTextField(value = semester, onValueChange = { semester = it }, bgRes = R.drawable.bg_semester, placeholder = "")
             Spacer(modifier = Modifier.height(16.dp))
 
             TapedTextField(
@@ -109,25 +105,7 @@ fun SignUpScreen(
                         imageRes = R.drawable.sign_up,
                         contentDescription = "Sign up",
                         onClick = {
-                                    scope.launch {
-                                        try {
-                                            val user = User(
-                                                name = name,
-                                                surname = surname,
-                                                school = school,
-                                                semester = semester,
-                                                password = password,
-                                            )
-
-                                            db.userDao().insertUser(user)
-                                            Toast.makeText(context, "Account created!", Toast.LENGTH_SHORT).show()
-                                            onSignUp(name, surname, school, semester, password)
-                                        } catch (e: Exception) {
-                                            Log.e("SignUpScreen", "Error during sign up", e)
-                                            Toast.makeText(context, "Sign up failed: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
-                                        }
-                                    }
-
+                            onSignUp(name, surname, school, semester, password)
                         },
                         modifier = Modifier
                             .width(180.dp)
