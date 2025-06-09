@@ -50,7 +50,8 @@ fun StartScreen(
                 modifier           = Modifier
                     .fillMaxWidth()
                     .height(48.dp)
-                    .clip(btnShape)
+                    .clip(btnShape),
+                pressEffect = PressEffect.Light
             )
             androidx.compose.material.Text(
                 text     = stringResource(R.string.unlock_potential),
@@ -68,7 +69,8 @@ fun StartScreen(
                 modifier           = Modifier
                     .fillMaxWidth()
                     .height(48.dp)
-                    .clip(btnShape)
+                    .clip(btnShape),
+                pressEffect = PressEffect.Light
             )
             androidx.compose.material.Text(
                 text     = stringResource(R.string.welcome_back),

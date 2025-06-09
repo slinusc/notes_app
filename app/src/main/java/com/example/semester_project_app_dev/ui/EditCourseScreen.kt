@@ -21,8 +21,11 @@ import com.example.semester_project_app_dev.data.Course
 fun EditCourseScreen(
     course: Course,
     onSave: (Course) -> Unit,
-    onBack: () -> Unit = {}
-) {
+    onBack: () -> Unit = {},
+    onDelete: (() -> Unit)? = null,
+    isNew: Boolean     // ← add this parameter
+)
+{
     /* ── editable fields ─────────────────────────────────────────── */
     var name    by rememberSaveable { mutableStateOf(course.name) }
     var teacher by rememberSaveable { mutableStateOf(course.teacher) }
@@ -31,13 +34,20 @@ fun EditCourseScreen(
 
     /* ── drawables ──────────────────────────────────────────────── */
     val bgNotebook   = painterResource(R.drawable.bg_notebook)
-    val titlePainter = painterResource(R.drawable.edit_course)         // “Edit course”
-    // val titlePainter2 = painterResource(R.drawable.edit_course2)     // “Create course”
+    val titlePainter2 = painterResource(R.drawable.create_course)     // “Create course”
     val folderPainter= painterResource(R.drawable.folder_edit_course)  // big blue folder
-    val backPainter  = painterResource(R.drawable.back_arrow)
     val savePainter  = painterResource(R.drawable.save)             // blue “save” pill
+    val titlePainter = if (isNew)
+        painterResource(R.drawable.create_course)
+    else
+        painterResource(R.drawable.edit_course)
+    var showConfirmDialog by remember { mutableStateOf(false) }
+
 
     Box(Modifier.fillMaxSize()) {
+
+
+
         /* background */
         Image(
             painter = bgNotebook,
@@ -47,15 +57,16 @@ fun EditCourseScreen(
         )
 
         /* back button */
-        Image(
-            painter = backPainter,
+        PressableImage(
+            imageRes = R.drawable.back_arrow, // assuming backPainter = painterResource(R.drawable.back_arrow)
             contentDescription = "Back",
+            width = 32.dp,
+            height = 32.dp,
+            onClick = onBack,
             modifier = Modifier
-                .padding(15.dp)
-                .size(30.dp)
+                .padding(top = 16.dp, start = 30.dp)
                 .align(Alignment.TopStart)
-                .clickable(onClick = onBack)
-                .zIndex(1f) // ensure it is above the scrollable content
+                .zIndex(1f)
         )
 
         /* scrollable form */
@@ -63,26 +74,27 @@ fun EditCourseScreen(
             Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp, vertical = 40.dp),
+                .padding(horizontal = 24.dp, vertical = 14.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             /* header row: title + folder icon */
             Box(Modifier.fillMaxWidth()) {
                 Image(
                     painter = titlePainter,
-                    contentDescription = "Edit course title",
+                    contentDescription = if (isNew) "Create course title" else "Edit course title",
                     modifier = Modifier
-                        .padding(top = 40.dp, start = 15.dp)
+                        .padding(top = 60.dp, start = 15.dp)
                         .height(40.dp)
                         .align(Alignment.TopStart),
                     contentScale = ContentScale.Fit
                 )
+
                 Image(
                     painter = folderPainter,
                     contentDescription = null,
                     modifier = Modifier
                         .padding(end = 8.dp)
-                        .size(130.dp)
+                        .size(140.dp)
                         .align(Alignment.TopEnd),
                     contentScale = ContentScale.Fit
                 )
@@ -95,7 +107,8 @@ fun EditCourseScreen(
                 value = name,
                 onValueChange = { name = it },
                 bgRes = R.drawable.course, // "Course name"
-                placeholder = ""
+                placeholder = "",
+                contentPadding = PaddingValues(start = 36.dp, top = 42.dp)
             )
             Spacer(Modifier.height(12.dp))
 
@@ -103,23 +116,26 @@ fun EditCourseScreen(
                 value = teacher,
                 onValueChange = { teacher = it },
                 bgRes = R.drawable.teacher, // "Teacher"
-                placeholder = ""
+                placeholder = "",
+                contentPadding = PaddingValues(start = 36.dp, top = 42.dp)
             )
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(12.dp))
 
             TapedTextField(
                 value = day,
                 onValueChange = { day = it },
                 bgRes = R.drawable.day, // "Day"
-                placeholder = ""
+                placeholder = "",
+                contentPadding = PaddingValues(start = 36.dp, top = 38.dp)
             )
-            Spacer(Modifier.height(18.dp))
+            Spacer(Modifier.height(12.dp))
 
             TapedTextField(
                 value = time,
                 onValueChange = { time = it },
                 bgRes = R.drawable.time, // "Time"
-                placeholder = ""
+                placeholder = "",
+                contentPadding = PaddingValues(start = 36.dp, top = 38.dp)
             )
 
             Spacer(Modifier.height(32.dp))
@@ -127,33 +143,71 @@ fun EditCourseScreen(
             /* save button */
             val ready = listOf(name, teacher, day, time).all { it.isNotBlank() }
 
-            if (ready) {
-                PressableImage(
-                    imageRes = R.drawable.sign_up,
-                    contentDescription = "Save",
-                    onClick = {
-                        onSave(
-                            course.copy(
-                                name = name,
-                                teacher = teacher,
-                                day = day,
-                                time = time
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (ready) {
+                    PressableImage(
+                        imageRes = R.drawable.save,
+                        contentDescription = "Save",
+                        onClick = {
+                            onSave(
+                                course.copy(
+                                    name = name,
+                                    teacher = teacher,
+                                    day = day,
+                                    time = time
+                                )
                             )
-                        )
+                        },
+                        modifier = Modifier
+                            .height(45.dp),
+                        pressEffect = PressEffect.Light
+                    )
+                } else {
+                    Image(
+                        painter = savePainter,
+                        contentDescription = "Save (disabled)",
+                        modifier = Modifier
+                            .height(45.dp)
+                    )
+                }
+
+                if (!isNew) {
+                    PressableImage(
+                        imageRes = R.drawable.delete,
+                        contentDescription = "Delete",
+                        onClick = { showConfirmDialog = true },
+                        modifier = Modifier.height(45.dp),
+                        pressEffect = PressEffect.Light
+                    )
+                }
+
+            }
+            if (showConfirmDialog) {
+                androidx.compose.material3.AlertDialog(
+                    onDismissRequest = { showConfirmDialog = false },
+                    confirmButton = {
+                        androidx.compose.material3.TextButton(onClick = {
+                            showConfirmDialog = false
+                            onDelete?.invoke()
+                        }) {
+                            androidx.compose.material3.Text("Delete")
+                        }
                     },
-                    modifier = Modifier
-                        .width(180.dp)
-                        .height(50.dp)
-                )
-            } else {
-                Image(
-                    painter = savePainter,
-                    contentDescription = "Save (disabled)",
-                    modifier = Modifier
-                        .width(180.dp)
-                        .height(50.dp)
+                    dismissButton = {
+                        androidx.compose.material3.TextButton(onClick = {
+                            showConfirmDialog = false
+                        }) {
+                            androidx.compose.material3.Text("Cancel")
+                        }
+                    },
+                    title = { androidx.compose.material3.Text("Confirm Deletion") },
+                    text = { androidx.compose.material3.Text("Are you sure you want to delete this course? This action cannot be undone.") }
                 )
             }
+
         }
     }
 }

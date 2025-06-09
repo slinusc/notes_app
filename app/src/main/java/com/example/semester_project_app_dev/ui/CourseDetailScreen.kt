@@ -26,8 +26,11 @@ fun CourseDetailScreen(
     menuState: MenuState,                 // ← NEW  (must be supplied)
     onCourseChange: (Course) -> Unit,
     onBack: () -> Unit,
-    onSettings: () -> Unit
-)
+    onHomeworkClick: (Course) -> Unit,
+    onMeetingClick: (Course) -> Unit,
+    onSettings: (Course) -> Unit
+
+    )
  {
     /* ── Editable fields ─────────────────────────────────────────────── */
     var name     by remember { mutableStateOf(course.name) }
@@ -42,17 +45,16 @@ fun CourseDetailScreen(
     }.also {
         if (it.isEmpty()) it.add("")          // ← always keep ≥ 1 page
     }
-    var current by remember { mutableIntStateOf(0) }
-    var pageText by remember { mutableStateOf(pages.getOrNull(0) ?: "") }
+     var current by remember { mutableIntStateOf(course.currentPageIndex) }
+     var pageText by remember { mutableStateOf(pages.getOrNull(0) ?: "") }
 
     /* ── UI helpers ──────────────────────────────────────────────────── */
     val scroll    = rememberScrollState()
-    val backIcon  = painterResource(R.drawable.img_home_btn)
-    val menuIcon  = painterResource(R.drawable.menu_icon)
 
+     /* ── Delete page dialog ──────────────────────────────────────────── */
+     var showPageDeleteDialog by remember { mutableStateOf(false) }
 
-
-    /* ────────────────────────────────────────────────────────────────── */
+     /* ────────────────────────────────────────────────────────────────── */
 
     Box(Modifier.fillMaxSize()) {
 
@@ -90,23 +92,24 @@ fun CourseDetailScreen(
                         ),
                         index = index,
                         onClick = {},
-                        textScale = 1.25f,
+                        textScale = 1.3f,
                         modifier = Modifier.matchParentSize()   // card fills the Box
                     )
 
                     // Urgent toggle (lavender when off, red when on)
-                    Image(
-                        painter = painterResource(
-                            if (isUrgent) R.drawable.urgent_on else R.drawable.urgent_off
-                        ),
+                    PressableImage(
+                        imageRes = if (isUrgent) R.drawable.urgent_on else R.drawable.urgent_off,
                         contentDescription = "Toggle urgent",
+                        width = 50.dp,
+                        height = 50.dp,
+                        pressEffect = PressEffect.Light,
+                        onClick = { isUrgent = !isUrgent },
                         modifier = Modifier
-                            .size(50.dp)                        // adjust to taste
-                            .align(Alignment.TopEnd)            // sits over card corner
-                            .offset(x = (-10).dp, y = (-3).dp)      // slight inset
-                            .clickable { isUrgent = !isUrgent }
-                            .zIndex(3f)                         // stays above the card
+                            .align(Alignment.TopEnd)
+                            .offset(x = (-10).dp, y = (-3).dp)
+                            .zIndex(3f)
                     )
+
                 }
 
                 Spacer(Modifier.width(8.dp))
@@ -117,20 +120,46 @@ fun CourseDetailScreen(
                         .weight(0.35f)
                         .fillMaxHeight()
                 ) {
-                    Image(
-                        painterResource(R.drawable.folder_homework),
-                        "Homework",
-                        Modifier
-                            .size(90.dp)
-                            .clickable { /* TODO */ }
+                    PressableImage(
+                        R.drawable.folder_homework,
+                        contentDescription = "Homework",
+                        onClick = {
+                            pages[current] = pageText
+                            onHomeworkClick(
+                                course.copy(
+                                    name = name,
+                                    teacher = teacher,
+                                    day = day,
+                                    time = time,
+                                    isUrgent = isUrgent,
+                                    pages = pages.toList()
+                                )
+                            )
+                        },
+                        modifier = Modifier.size(90.dp),
+                        pressEffect = PressEffect.Light
                     )
-                    Image(
-                        painterResource(R.drawable.folder_meeting),
-                        "Meeting",
-                        Modifier
-                            .size(90.dp)
-                            .clickable { /* TODO */ }
+
+                    PressableImage(
+                        R.drawable.folder_meeting,
+                        contentDescription = "Exam",
+                        onClick = {
+                            pages[current] = pageText
+                            onMeetingClick(
+                                course.copy(
+                                    name = name,
+                                    teacher = teacher,
+                                    day = day,
+                                    time = time,
+                                    isUrgent = isUrgent,
+                                    pages = pages.toList()
+                                )
+                            )
+                        },
+                        modifier = Modifier.size(93.dp),
+                        pressEffect = PressEffect.Light
                     )
+
                 }
             }
 
@@ -142,7 +171,7 @@ fun CourseDetailScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 30.dp)
+                    .padding(start = 35.dp)
             ) {
                 /* + New page */
                 PressableImage(
@@ -156,28 +185,51 @@ fun CourseDetailScreen(
                     },
                 )
 
+                Spacer(Modifier.width(20.dp))
+
                 /* 🗑 Delete page */
                 PressableImage(
                     imageRes = R.drawable.ic_delete,
-                    width = 142.dp,
+                    //width = 142.dp,
                     contentDescription = "Delete page",
                     onClick = {
-                        // remove the current page
-                        pages.removeAt(current)
-
-                        // guarantee at least one page
-                        if (pages.isEmpty()) pages.add("")
-
-                        // adjust index if we just removed the last page
-                        if (current >= pages.size) current = pages.lastIndex
-
-                        // update editor
-                        pageText = pages[current]
+                        showPageDeleteDialog = true
                     },
+                    height = 32.dp,
                 )
             }
 
-            Spacer(Modifier.height(30.dp))
+            if (showPageDeleteDialog) {
+                androidx.compose.material3.AlertDialog(
+                    onDismissRequest = { showPageDeleteDialog = false },
+                    confirmButton = {
+                        androidx.compose.material3.TextButton(onClick = {
+                            showPageDeleteDialog = false
+
+                            // perform deletion
+                            pages.removeAt(current)
+                            if (pages.isEmpty()) pages.add("")
+                            if (current >= pages.size) current = pages.lastIndex
+                            pageText = pages[current]
+
+                        }) {
+                            androidx.compose.material3.Text("Delete")
+                        }
+                    },
+                    dismissButton = {
+                        androidx.compose.material3.TextButton(onClick = {
+                            showPageDeleteDialog = false
+                        }) {
+                            androidx.compose.material3.Text("Cancel")
+                        }
+                    },
+                    title = { androidx.compose.material3.Text("Delete Page") },
+                    text = { androidx.compose.material3.Text("Are you sure you want to delete this page? You won't be able to recover it.") }
+                )
+            }
+
+
+            Spacer(Modifier.height(20.dp))
 
             /* ── Paging controls ────────────────────────────────────── */
             Row(
@@ -215,54 +267,68 @@ fun CourseDetailScreen(
                 label = { Text("Notes") },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(450.dp),
+                    .height(460.dp),
                 maxLines = Int.MAX_VALUE
             )
 
             Spacer(Modifier.height(32.dp))
         }
 
-        /* 2️⃣ Back button */
-        Image(
-            backIcon, "Back",
-            Modifier
-                .padding(16.dp)
-                .size(32.dp)
-                .align(Alignment.TopStart)
-                .zIndex(2f)
-                .clickable {
-                    pages[current] = pageText
-                    onCourseChange(
-                        course.copy(
-                            name = name,
-                            teacher = teacher,
-                            day = day,
-                            time = time,
-                            isUrgent = isUrgent,
-                            pages = pages.toList()
-                        )
+        PressableImage(
+        imageRes = R.drawable.img_home_btn, // assuming `backIcon = painterResource(R.drawable.back_icon)`
+        contentDescription = "Back",
+        width = 32.dp,
+        height = 32.dp,
+            onClick = {
+                pages[current] = pageText
+                onCourseChange(
+                    course.copy(
+                        name = name,
+                        teacher = teacher,
+                        day = day,
+                        time = time,
+                        isUrgent = isUrgent,
+                        pages = pages.toList(),
+                        currentPageIndex = current
                     )
-                    onBack()
-                }
-        )
+                )
+                onBack() // ✅ go back after saving
+            },
+        modifier = Modifier
+            .padding(top = 16.dp, start = 35.dp)
+            .align(Alignment.TopStart)
+            .zIndex(2f)
+    )
 
-        /* 3️⃣ Menu (hamburger) button */
-        Image(
-            menuIcon, "Menu",
-            Modifier
-                .padding(16.dp)
-                .size(32.dp)
+
+        /* Settings button (top‐right) */
+        PressableImage(
+            imageRes = R.drawable.settings_course,
+            contentDescription = "Menu",
+            width = 32.dp,
+            height = 32.dp,
+            onClick = {
+                pages[current] = pageText
+                menuState.toggle()
+                onSettings(
+                    course.copy(
+                        name = name,
+                        teacher = teacher,
+                        day = day,
+                        time = time,
+                        isUrgent = isUrgent,
+                        pages = pages.toList(),
+                        currentPageIndex = current
+                    )
+                )
+            },
+            modifier = Modifier
+                .padding(top = 16.dp, end = 35.dp)
                 .align(Alignment.TopEnd)
-                // keep below SlideInMenu when it is open
                 .zIndex(if (menuState.isOpen) 0f else 2f)
-                .clickable { menuState.toggle() }
         )
 
-        /* 4️⃣ Slide-in panel */
-        SlideInMenu(
-            menuState = menuState,
-            onSettingsClick = { onSettings() }
-        )
+
 
     }
 }

@@ -45,15 +45,17 @@ fun SignUpScreen(
             modifier = Modifier.fillMaxSize()
         )
 
-        // Back button (top-left corner)
-        Image(
-            painter = backPainter,
+        /* back button */
+        PressableImage(
+            imageRes = R.drawable.back_arrow, // assuming backPainter = painterResource(R.drawable.back_arrow)
             contentDescription = "Back",
+            width = 32.dp,
+            height = 32.dp,
+            onClick = onBack,
             modifier = Modifier
-                .padding(15.dp)
-                .size(30.dp)
+                .padding(top = 16.dp, start = 30.dp)
                 .align(Alignment.TopStart)
-                .clickable(onClick = onBack)
+                .zIndex(1f)
         )
 
         Column(
@@ -109,15 +111,19 @@ fun SignUpScreen(
                         },
                         modifier = Modifier
                             .width(180.dp)
-                            .height(50.dp)
+                            .height(50.dp),
+                        pressEffect = PressEffect.Light
                     )
                 } else {
-                    Image(
-                        painter = painterResource(R.drawable.sign_up),
-                        contentDescription = "Sign up (disabled)",
+                    PressableImage(
+                        imageRes = R.drawable.sign_up,
+                        contentDescription = "Sign up",
+                        onClick = {// Do nothing if fields are not filled
+                        },
                         modifier = Modifier
                             .width(180.dp)
-                            .height(50.dp)
+                            .height(50.dp),
+                        pressEffect = PressEffect.Light
                     )
                 }
             }

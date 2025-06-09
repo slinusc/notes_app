@@ -45,14 +45,15 @@ fun EditUserScreen(
         )
 
         // Back button (top-left)
-        Image(
-            painter = backPainter,
+        PressableImage(
+            imageRes = R.drawable.back_arrow, // replace with your actual drawable if different
             contentDescription = "Back",
+            width = 30.dp,
+            height = 30.dp,
+            onClick = onBack,
             modifier = Modifier
-                .padding(15.dp)
-                .size(30.dp)
+                .padding(top = 16.dp, start = 30.dp)
                 .align(Alignment.TopStart)
-                .clickable(onClick = onBack)
         )
 
         Column(
@@ -110,14 +111,15 @@ fun EditUserScreen(
 
                 if (allFilled) {
                     PressableImage(
-                        imageRes = R.drawable.sign_up,
+                        imageRes = R.drawable.save,
                         contentDescription = "Save",
                         onClick = {
                             onSave(name, surname, school, semester)
                         },
                         modifier = Modifier
                             .width(180.dp)
-                            .height(50.dp)
+                            .height(50.dp),
+                        pressEffect = PressEffect.Light
                     )
                 } else {
                     Image(

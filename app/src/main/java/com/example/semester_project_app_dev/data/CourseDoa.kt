@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface CourseDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertCourse(course: Course)
+    suspend fun insertCourse(course: Course): Long
 
     @Delete
     suspend fun deleteCourse(course: Course)
@@ -27,6 +27,7 @@ interface CourseDao {
     @Query("DELETE FROM courses WHERE name = '' OR name IS NULL")
     suspend fun deleteEmptyNameRows()
 
-    @Query("SELECT * FROM courses WHERE id = :id")
-    suspend fun getCourseById(id: Int): Course?
+    @Query("SELECT * FROM courses WHERE id = :id LIMIT 1")
+    fun getCourseById(id: Int): Course?
+
 }

@@ -55,7 +55,7 @@ fun SlideInMenu(
             ) {
                 // Background image
                 Image(
-                    painter = painterResource(R.drawable.empty_sidebar),
+                    painter = painterResource(R.drawable.sidebar),
                     contentDescription = "Sidebar",
                     modifier = Modifier
                         .fillMaxSize()
@@ -67,28 +67,38 @@ fun SlideInMenu(
                     verticalArrangement = Arrangement.Top,
                     modifier = Modifier
                         .fillMaxHeight()
-                        .padding(top = 40.dp, start = 52.dp)
                 ) {
-                    PressableImage(
-                        imageRes = R.drawable.settings,
-                        contentDescription = "Settings",
-                        width = 40.dp,
-                        height = 40.dp,
-                        onClick = {
-                            onSettingsClick()          // ← delegate to parent screen
-                            menuState.close()
-                        }
-                    )
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Box(
+                        modifier = Modifier
+                            .padding(top = 150.dp, start = 58.dp)
+                            .size(40.dp) // base size
+                    ) {
+                        // Background image (purple icon)
+                        Image(
+                            painter = painterResource(R.drawable.purple),
+                            contentDescription = "Purple Icon",
+                            modifier = Modifier
+                                .fillMaxSize()  // fills the 40.dp box
+                        )
 
-                    PressableImage(
-                        imageRes = R.drawable.info,
-                        contentDescription = "Info",
-                        width = 40.dp,
-                        height = 40.dp,
-                        onClick = { /* TODO: Handle info */ }
-                    )
+                        // Pressable settings icon on top
+                        PressableImage(
+                            imageRes = R.drawable.settings,
+                            contentDescription = "Settings",
+                            onClick = {
+                                onSettingsClick()
+                                menuState.close()
+                            },
+                            modifier = Modifier
+                                .fillMaxSize()     // same size as purple icon
+                                .zIndex(1f)        // ensure it's on top
+                        )
+                    }
+
+
+
+
                 }
             }
         }

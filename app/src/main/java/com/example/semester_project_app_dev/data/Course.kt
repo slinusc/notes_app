@@ -14,6 +14,7 @@ data class Course(
     val time: String,
     val isUrgent: Boolean = false,
     val pages: List<String> = emptyList(),
+    var currentPageIndex: Int = 0,
     val todoList: List<String> = emptyList(),
     val userId: Int
 )

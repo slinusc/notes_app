@@ -57,15 +57,17 @@ fun LoginScreen(
         )
 
         // Back button (top-left corner)
-            Image(
-                painter = backPainter,
-                contentDescription = "Back",
-                    modifier = Modifier
-                        .padding(15.dp)
-                        .size(30.dp)
-                        .align(Alignment.TopStart)
-                    .clickable(onClick = onBack)
-            )
+        PressableImage(
+            imageRes = R.drawable.back_arrow, // assuming backPainter = painterResource(R.drawable.back_arrow)
+            contentDescription = "Back",
+            width = 32.dp,
+            height = 32.dp,
+            onClick = onBack,
+            modifier = Modifier
+                .padding(top = 16.dp, start = 30.dp)
+                .align(Alignment.TopStart)
+                .zIndex(1f)
+        )
 
         // Main content
         Column(
@@ -134,7 +136,8 @@ fun LoginScreen(
                                     }
 
                         },
-                        modifier = Modifier.height(48.dp)
+                        modifier = Modifier.height(48.dp),
+                        pressEffect = PressEffect.Light
                     )
                 } else {
                     Image(

@@ -2,12 +2,15 @@
 
 package com.example.semester_project_app_dev
 
+
 import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
+
+
 import com.example.semester_project_app_dev.data.AppDatabase
 import com.example.semester_project_app_dev.data.Course
 import com.example.semester_project_app_dev.data.User
@@ -19,6 +22,10 @@ import com.example.semester_project_app_dev.ui.StartScreen
 import com.example.semester_project_app_dev.ui.theme.SemesterProjectAppDevTheme
 import com.example.semester_project_app_dev.ui.EditUserScreen
 import com.example.semester_project_app_dev.ui.EditCourseScreen
+import com.example.semester_project_app_dev.ui.HomeworkScreen
+import com.example.semester_project_app_dev.ui.MeetingScreen
+
+
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -122,23 +129,23 @@ class MainActivity : ComponentActivity() {
                                         val userId = userDao.insertUser(newUser).toInt()
 
                                         val baseCourse = Course(
-                                            name = "MATH",
-                                            teacher = "Dr. Friedrich Gauss",
+                                            name = "English",
+                                            teacher = "Mr. Shakespeare",
                                             day = "Tuesday",
                                             time = "09:00 - 12:00",
-                                            isUrgent = true,
-                                            userId = userId
-                                        )
-                                        val baseCourse2 = Course(
-                                            name = "PHYSICS",
-                                            teacher = "Dr. Albert Einstein",
-                                            day = "Wednesday",
-                                            time = "10:00 - 13:00",
                                             isUrgent = false,
                                             userId = userId
                                         )
+                                        val baseCourse2 = Course(
+                                            name = "Physics",
+                                            teacher = "Dr. Albert Einstein",
+                                            day = "Wednesday",
+                                            time = "10:00 - 13:00",
+                                            isUrgent = true,
+                                            userId = userId
+                                        )
                                         val baseCourse3 = Course(
-                                            name = "CHEMISTRY",
+                                            name = "Chemistry",
                                             teacher = "Dr. Marie Curie",
                                             day = "Thursday",
                                             time = "11:00 - 14:00",
@@ -146,11 +153,19 @@ class MainActivity : ComponentActivity() {
                                             userId = userId
                                         )
                                         val baseCourse4 = Course(
-                                            name = "BIOLOGY",
+                                            name = "Biology",
                                             teacher = "Dr. Charles Darwin",
                                             day = "Friday",
                                             time = "12:00 - 15:00",
                                             isUrgent = false,
+                                            userId = userId
+                                        )
+                                        var baseCourse5 = Course(
+                                            name = "Algorithms",
+                                            teacher = "Mr. Alan Turing",
+                                            day = "Monday",
+                                            time = "08:00 - 11:00",
+                                            isUrgent = true,
                                             userId = userId
                                         )
 
@@ -158,6 +173,7 @@ class MainActivity : ComponentActivity() {
                                         courseDao.insertCourse(baseCourse2)
                                         courseDao.insertCourse(baseCourse3)
                                         courseDao.insertCourse(baseCourse4)
+                                        courseDao.insertCourse(baseCourse5)
 
                                         withContext(Dispatchers.Main) {
                                             Toast.makeText(context, "Account created!", Toast.LENGTH_SHORT).show()
@@ -225,17 +241,45 @@ class MainActivity : ComponentActivity() {
                     }
 
 
+                    "homework" -> selectedCourse?.let { course ->
+                        HomeworkScreen(
+                            course = course,
+                            onBack = {
+                                currentScreen = "courseDetail"
+                            }
+                        )
+                    }
+
+                    "meeting" -> selectedCourse?.let { course ->
+                        MeetingScreen(
+                            course = course,
+                            onBack = {
+                                currentScreen = "courseDetail"
+                            }
+                        )
+                    }
+
+
                     "editCourse" -> courseForEdit?.let { c ->
                         EditCourseScreen(
                             course = c,
+                            isNew = false,
                             onSave = { updated ->
                                 coroutineScope.launch(Dispatchers.IO) {
                                     val updatedWithUser = updated.copy(userId = loggedInUser!!.id)
-                                    courseDao.insertCourse(updatedWithUser)  // Room will upsert due to @PrimaryKey
-
+                                    courseDao.insertCourse(updatedWithUser)
                                     withContext(Dispatchers.Main) {
                                         selectedCourse = updatedWithUser
                                         currentScreen = "courseDetail"
+                                    }
+                                }
+                            },
+                            onDelete = {
+                                coroutineScope.launch(Dispatchers.IO) {
+                                    courseDao.deleteCourse(c)  // ← uses your @Delete
+                                    withContext(Dispatchers.Main) {
+                                        selectedCourse = null
+                                        currentScreen = "overview"
                                     }
                                 }
                             },
@@ -244,6 +288,7 @@ class MainActivity : ComponentActivity() {
                             }
                         )
                     }
+
 
                     // New Course Screen: create a new course
 
@@ -261,12 +306,14 @@ class MainActivity : ComponentActivity() {
 
                         EditCourseScreen(
                             course = newCourse,
+                            isNew = true,
                             onSave = { created ->
                                 coroutineScope.launch(Dispatchers.IO) {
-                                    courseDao.insertCourse(created)
+                                    val newId = courseDao.insertCourse(created)
+                                    val savedCourse = created.copy(id = newId.toInt())
                                     withContext(Dispatchers.Main) {
-                                        selectedCourse = created
-                                        currentScreen = "courseDetail"
+                                        selectedCourse = savedCourse
+                                        currentScreen = "overview"
                                     }
                                 }
                             },
@@ -279,40 +326,73 @@ class MainActivity : ComponentActivity() {
                     }
 
 
-
                     // CourseDetail Screen: edit or save a course
                     // ──────────────────────────────────────────────────────────────
                     "courseDetail" -> {
-                        val detailMenuState = rememberMenuState()      // ➊ NEW
+                        val detailMenuState = rememberMenuState()
 
                         selectedCourse?.let { course ->
                             CourseDetailScreen(
-                                course   = course,
-                                index    = selectedCourseIndex,
-
-                                // ➋ NEW arguments ↓↓↓
+                                course = course,
+                                index = selectedCourseIndex,
                                 menuState = detailMenuState,
-                                onSettings = {
-                                    courseForEdit = course          // keep a reference if you need it
-                                    currentScreen = "editCourse"    // switch to the new screen
+                                onSettings = { updatedCourse ->
+                                    coroutineScope.launch(Dispatchers.IO) {
+                                        val updatedWithUser = updatedCourse.copy(userId = loggedInUser!!.id)
+                                        courseDao.insertCourse(updatedWithUser) // ✅ Save to DB
+                                        withContext(Dispatchers.Main) {
+                                            selectedCourse = updatedWithUser     // ✅ Update state
+                                            courseForEdit = updatedWithUser      // ✅ Open in edit screen
+                                            currentScreen = "editCourse"
+                                        }
+                                    }
                                 },
-
-                                onCourseChange = { updatedCourse ->     // existing
+                                onCourseChange = { updatedCourse ->
                                     coroutineScope.launch(Dispatchers.IO) {
                                         if (updatedCourse.name.isNotBlank()) {
                                             val updatedWithUser = updatedCourse.copy(userId = loggedInUser!!.id)
                                             courseDao.insertCourse(updatedWithUser)
+
+                                            withContext(Dispatchers.Main) {
+                                                selectedCourse = updatedWithUser
+                                                currentScreen = "overview"
+                                            }
+                                        } else {
+                                            withContext(Dispatchers.Main) {
+                                                currentScreen = "overview"
+                                            }
                                         }
+                                    }
+                                }
+
+                                ,
+                                onBack = {
+                                    selectedCourse = null
+                                    currentScreen = "overview"
+                                },
+
+                                onHomeworkClick = { updatedCourse ->
+                                    coroutineScope.launch(Dispatchers.IO) {
+                                        val updatedWithUser = updatedCourse.copy(userId = loggedInUser!!.id)
+                                        courseDao.insertCourse(updatedWithUser)
                                         withContext(Dispatchers.Main) {
-                                            selectedCourse = null
-                                            currentScreen  = "overview"
+                                            selectedCourse = updatedWithUser
+                                            currentScreen = "homework"
                                         }
                                     }
                                 },
-                                onBack = {                               // existing
-                                    selectedCourse = null
-                                    currentScreen  = "overview"
+                                onMeetingClick = { updatedCourse ->
+                                    coroutineScope.launch(Dispatchers.IO) {
+                                        val updatedWithUser = updatedCourse.copy(userId = loggedInUser!!.id)
+                                        courseDao.insertCourse(updatedWithUser)
+                                        withContext(Dispatchers.Main) {
+                                            selectedCourse = updatedWithUser
+                                            currentScreen = "meeting"
+                                        }
+                                    }
                                 }
+
+
                             )
                         }
                     }
@@ -322,6 +402,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
 
 // CODE STRUCTURE NOTES:
 // 1) Duplicate onBack parameter removed from SignUpScreen call.
