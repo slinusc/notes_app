@@ -106,7 +106,7 @@ fun CourseDetailScreen(
                         onClick = { isUrgent = !isUrgent },
                         modifier = Modifier
                             .align(Alignment.TopEnd)
-                            .offset(x = (-10).dp, y = (-3).dp)
+                            .offset(x = (-15).dp, y = (-3).dp)
                             .zIndex(3f)
                     )
 
@@ -171,7 +171,7 @@ fun CourseDetailScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 35.dp)
+                    .padding(start = 30.dp)
             ) {
                 /* + New page */
                 PressableImage(
@@ -183,6 +183,8 @@ fun CourseDetailScreen(
                         current = pages.lastIndex
                         pageText = ""
                     },
+
+                    height = 32.dp,
                 )
 
                 Spacer(Modifier.width(20.dp))
