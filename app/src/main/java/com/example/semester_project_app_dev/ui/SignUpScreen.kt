@@ -35,7 +35,7 @@ fun SignUpScreen(
     val notebookPainter = painterResource(R.drawable.bg_notebook)
     val welcomePainter = painterResource(R.drawable.img_welcome_sign_in)
     val pencilPainter = painterResource(R.drawable.img_pencil)
-    val backPainter = painterResource(R.drawable.back_arrow) // ← Add your own back icon to res/drawable
+    val backPainter = painterResource(R.drawable.back_arrow)
 
     Box(modifier = Modifier.fillMaxSize()) {
         Image(
@@ -47,7 +47,7 @@ fun SignUpScreen(
 
         /* back button */
         PressableImage(
-            imageRes = R.drawable.back_arrow, // assuming backPainter = painterResource(R.drawable.back_arrow)
+            imageRes = R.drawable.back_arrow,
             contentDescription = "Back",
             width = 32.dp,
             height = 32.dp,

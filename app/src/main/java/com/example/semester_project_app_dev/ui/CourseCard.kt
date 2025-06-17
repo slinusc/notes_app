@@ -22,16 +22,6 @@ import androidx.compose.ui.unit.sp
 import com.example.semester_project_app_dev.R
 import com.example.semester_project_app_dev.data.Course
 
-
-/**
- * A single “course card” that can represent:
- *  • An existing course (course != null), or
- *  • An “Add New Course” placeholder (course == null).
- *
- * The `index` parameter selects which drawable to use.
- * The bottom accent strip has been removed per request.
- */
-
 @Composable
 fun CourseCard(
     course: Course?,

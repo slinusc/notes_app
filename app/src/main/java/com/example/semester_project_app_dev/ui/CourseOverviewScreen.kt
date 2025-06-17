@@ -17,11 +17,6 @@ import com.example.semester_project_app_dev.data.Course
 import com.example.semester_project_app_dev.state.MenuState
 import com.example.semester_project_app_dev.ui.components.SlideInMenu
 
-/**
- * Shows a grid of exactly:
- *  • one CourseCard for each Course in `courses: List<Course>`,
- *  • followed by exactly one “Add New Course” tile at the end.
- */
 @Composable
 fun CourseOverviewScreen(
     name: String,

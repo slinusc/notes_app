@@ -29,7 +29,7 @@ fun PressableImage(
     height: Dp? = null,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    pressEffect: PressEffect = PressEffect.Standard // ← default
+    pressEffect: PressEffect = PressEffect.Standard // default
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()

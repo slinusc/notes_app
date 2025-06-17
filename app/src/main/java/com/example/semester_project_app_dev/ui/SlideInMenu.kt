@@ -21,7 +21,7 @@ import androidx.compose.ui.zIndex
 
 @Composable
 fun SlideInMenu(
-    menuState: MenuState,            // ← name : Type   (no “= …” here)
+    menuState: MenuState,
     onSettingsClick: () -> Unit,
     onInfoClick: () -> Unit = {}
 ) {
@@ -79,7 +79,7 @@ fun SlideInMenu(
                             painter = painterResource(R.drawable.purple),
                             contentDescription = "Purple Icon",
                             modifier = Modifier
-                                .fillMaxSize()  // fills the 40.dp box
+                                .fillMaxSize()
                         )
 
                         // Pressable settings icon on top
@@ -91,8 +91,8 @@ fun SlideInMenu(
                                 menuState.close()
                             },
                             modifier = Modifier
-                                .fillMaxSize()     // same size as purple icon
-                                .zIndex(1f)        // ensure it's on top
+                                .fillMaxSize()
+                                .zIndex(1f)
                         )
                     }
 

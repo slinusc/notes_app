@@ -244,7 +244,7 @@ class MainActivity : ComponentActivity() {
 
                     // Overview Screen: show courses for the current user
                     "overview" -> loggedInUser?.let { user ->
-                        val overviewMenuState = rememberMenuState()   //  ←  add this line
+                        val overviewMenuState = rememberMenuState()
                         CourseOverviewScreen(
                             name = user.name,
                             surname = user.surname,
@@ -417,10 +417,10 @@ class MainActivity : ComponentActivity() {
                                 onSettings = { updatedCourse ->
                                     coroutineScope.launch(Dispatchers.IO) {
                                         val updatedWithUser = updatedCourse.copy(userId = loggedInUser!!.id)
-                                        courseDao.insertCourse(updatedWithUser) // ✅ Save to DB
+                                        courseDao.insertCourse(updatedWithUser)
                                         withContext(Dispatchers.Main) {
-                                            selectedCourse = updatedWithUser     // ✅ Update state
-                                            courseForEdit = updatedWithUser      // ✅ Open in edit screen
+                                            selectedCourse = updatedWithUser
+                                            courseForEdit = updatedWithUser
                                             currentScreen = "editCourse"
                                         }
                                     }
@@ -480,11 +480,3 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
-
-// CODE STRUCTURE NOTES:
-// 1) Duplicate onBack parameter removed from SignUpScreen call.
-// 2) Consider using a sealed class or enum for "currentScreen" instead of raw strings to avoid typos.
-// 3) The DAO "authenticate" is called twice during sign-up; a unique constraint in the database could prevent duplicates more efficiently.
-// 4) Avoid reading/writing SharedPreferences and Room DAO on the UI thread; ensure withContext(Dispatchers.IO) wraps all DB logic.
-// 5) For better scalability, extract navigation logic into a dedicated Navigator or use a library (e.g. Jetpack Navigation Compose).
