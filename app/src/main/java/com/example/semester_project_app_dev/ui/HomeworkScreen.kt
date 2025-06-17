@@ -1,5 +1,6 @@
 package com.example.semester_project_app_dev.ui
 
+import HomeworkCard
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -15,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -23,14 +25,17 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.example.semester_project_app_dev.R
 import com.example.semester_project_app_dev.data.Course
+import com.example.semester_project_app_dev.data.HomeworkItem
 
 @Composable
 fun HomeworkScreen(
     course: Course,
+    homeworks: List<HomeworkItem>,
     onBack: () -> Unit,
+    onToggleDone: (HomeworkItem) -> Unit,
+    onAddHomework: () -> Unit
 ) {
-
-    var isHomework3Done by remember { mutableStateOf(true) }
+    val undoneCount = homeworks.count { !it.isDone }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -41,7 +46,7 @@ fun HomeworkScreen(
         ) {
             Spacer(Modifier.height(60.dp))
 
-            // Header Row: Homework Folder wider than Undone HW
+            // Header: Folder + Counter
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -59,10 +64,9 @@ fun HomeworkScreen(
 
                 Spacer(modifier = Modifier.width(8.dp))
 
+                // Homework Counter
                 Image(
-                    painter = painterResource(
-                        if (isHomework3Done) R.drawable.hw_undone3 else R.drawable.undone_hw
-                    ),
+                    painter = painterResource(R.drawable.hw_undone3),
                     contentDescription = "Undone Homework",
                     modifier = Modifier
                         .weight(0.7f)
@@ -74,65 +78,29 @@ fun HomeworkScreen(
             Spacer(Modifier.height(12.dp))
 
             // Course Info
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.Start
-            ) {
+            Column(modifier = Modifier.fillMaxWidth()) {
                 Text(
                     text = course.name.uppercase(),
                     style = MaterialTheme.typography.headlineLarge
                         .copy(fontWeight = FontWeight.Bold, fontSize = 36.sp),
-                    modifier = Modifier.padding(start = 16.dp)
+                    modifier = Modifier.padding(start = 16.dp),
+                    color = Color.Black
                 )
                 Text(
                     text = course.teacher,
                     style = MaterialTheme.typography.labelLarge
                         .copy(fontWeight = FontWeight.Light, fontSize = 20.sp),
-                    modifier = Modifier.padding(start = 16.dp)
+                    modifier = Modifier.padding(start = 16.dp),
+                    color = Color.Black
                 )
             }
 
             Spacer(Modifier.height(12.dp))
 
-            // Homework Card Placeholders
-            Image(
-                painter = painterResource(R.drawable.hw1),
-                contentDescription = "Homework 1",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(130.dp)
-                    .padding(vertical = 6.dp),
-                contentScale = ContentScale.FillWidth
-            )
-
-            Image(
-                painter = painterResource(R.drawable.hw2),
-                contentDescription = "Homework 2",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(130.dp)
-                    .padding(vertical = 6.dp),
-                contentScale = ContentScale.FillWidth
-            )
-
-            val interactionSource = remember { MutableInteractionSource() }
-
-            Image(
-                painter = painterResource(
-                    if (isHomework3Done) R.drawable.hw3_unchecked else R.drawable.hw_done
-                ),
-                contentDescription = "Homework 3",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(130.dp)
-                    .padding(vertical = 6.dp)
-                    .clickable(
-                        interactionSource = interactionSource,
-                        indication = null // disables ripple
-                    ) { isHomework3Done = !isHomework3Done },
-                contentScale = ContentScale.FillWidth
-            )
-
+            // Homework List
+            homeworks.forEach { hw ->
+                HomeworkCard(item = hw, onToggleDone = { onToggleDone(hw) })
+            }
 
             Spacer(Modifier.height(100.dp))
         }
@@ -150,16 +118,16 @@ fun HomeworkScreen(
                 .zIndex(2f)
         )
 
+        // Add Homework ("+" Button)
         PressableImage(
             imageRes = R.drawable.plus,
-            contentDescription = "Menu",
+            contentDescription = "Add Homework",
             width = 32.dp,
             height = 32.dp,
-            onClick = { /* TODO: handle menu */ },
+            onClick = onAddHomework,
             modifier = Modifier
                 .padding(top = 16.dp, end = 35.dp)
                 .align(Alignment.TopEnd)
         )
-
     }
 }

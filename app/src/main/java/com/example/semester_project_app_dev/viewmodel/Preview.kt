@@ -71,7 +71,27 @@ fun PreviewEditUserScreen() {
 fun PreviewHomeworkScreen() {
     HomeworkScreen(
         course = Course(name = "Biology", teacher = "Dr. Darwin", day = "Friday", time = "12:00", userId = 1),
-        onBack = {}
+        homeworks = listOf(
+            com.example.semester_project_app_dev.data.HomeworkItem(
+                id = 1,
+                courseId = 1,
+                title = "Cell Structure Review",
+                details = "Label the parts of a cell.\nWrite their functions.",
+                dueDay = "Friday",
+                isDone = false
+            ),
+            com.example.semester_project_app_dev.data.HomeworkItem(
+                id = 2,
+                courseId = 1,
+                title = "DNA vs RNA",
+                details = "Compare and contrast DNA and RNA.",
+                dueDay = "Monday",
+                isDone = true
+            )
+        ),
+        onBack = {},
+        onToggleDone = {},
+        onAddHomework = {}
     )
 }
 

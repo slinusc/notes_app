@@ -6,10 +6,17 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.semester_project_app_dev.R
 import com.example.semester_project_app_dev.data.HomeworkItem
+import com.example.semester_project_app_dev.ui.PressEffect
+import com.example.semester_project_app_dev.ui.PressableImage
 
 
 @Composable
@@ -20,48 +27,92 @@ fun HomeworkCard(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-            .heightIn(min = 130.dp)
+            .padding(horizontal = 8.dp, vertical = 8.dp)
+            .height(110.dp)
     ) {
-        // Background image based on done status
-        val backgroundRes = if (item.isDone) R.drawable.hw2 else R.drawable.hw1
-
+        // Background
         Image(
-            painter = painterResource(backgroundRes),
+            painter = painterResource(R.drawable.hw_card),
             contentDescription = null,
             modifier = Modifier
-                .fillMaxWidth()
-                .height(130.dp)
+                .fillMaxSize()
+                .alpha(if (!item.isDone) 1f else 0.6f), // lighten background when undone
+            contentScale = ContentScale.FillBounds
         )
 
-        Column(
+        // Content Row: left = text, right = day + checkbox
+        Row(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(start = 32.dp, top = 24.dp, end = 80.dp)
+                .padding(horizontal = 20.dp, vertical = 16.dp)
         ) {
-            Text(
-                text = item.title,
-                style = MaterialTheme.typography.titleMedium
-            )
-            Spacer(Modifier.height(6.dp))
-            Text(
-                text = item.details,
-                style = MaterialTheme.typography.bodySmall
-            )
-            Spacer(Modifier.height(6.dp))
-            Text(
-                text = "DUE ${item.dueDay.uppercase()}",
-                style = MaterialTheme.typography.bodySmall
-            )
-        }
+            // Left side: title + bullet points
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = item.title,
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp
+                    ),
+                    color = Color.White
+                )
+                Spacer(Modifier.height(6.dp))
 
-        // Toggle Done button (checkbox)
-        Box(
-            modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .padding(end = 24.dp)
-                .size(32.dp)
-                .clickable { onToggleDone() }
-        )
+                item.details.split("\n").forEach {
+                    if (it.isNotBlank()) {
+                        Text(
+                            text = "• $it",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.White
+                        )
+                    }
+                }
+            }
+
+            // Right side: Day + checkbox (independent)
+            Column(
+                modifier = Modifier
+                    .padding(start = 16.dp)
+                    .width(60.dp)
+                    .fillMaxHeight(),
+                verticalArrangement = Arrangement.SpaceBetween,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // Box 1: Day
+                Box(
+                    modifier = Modifier.padding(top = 2.dp)
+                ) {
+                    Text(
+                        text = item.dueDay,
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = FontWeight.Bold
+                        ),
+                        color = Color.White
+                    )
+                }
+
+                // Box 2: X mark or click zone
+                Box(
+                    modifier = Modifier.padding(start = 29.dp, bottom = 7.dp)
+                ) {
+                    if (item.isDone) {
+                        PressableImage(
+                            imageRes = R.drawable.x_mark,
+                            contentDescription = "Marked Done",
+                            onClick = onToggleDone,
+                            modifier = Modifier.size(32.dp)
+                        )
+                    } else {
+                        Box(
+                            modifier = Modifier
+                                .size(32.dp)
+                                .clickable { onToggleDone() }
+                        )
+                    }
+                }
+            }
+        }
     }
 }

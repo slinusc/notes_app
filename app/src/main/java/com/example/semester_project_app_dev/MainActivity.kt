@@ -30,6 +30,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import android.widget.Toast
+import com.example.semester_project_app_dev.data.HomeworkItem
 import com.example.semester_project_app_dev.state.rememberMenuState
 
 
@@ -169,11 +170,60 @@ class MainActivity : ComponentActivity() {
                                             userId = userId
                                         )
 
-                                        courseDao.insertCourse(baseCourse)
-                                        courseDao.insertCourse(baseCourse2)
-                                        courseDao.insertCourse(baseCourse3)
-                                        courseDao.insertCourse(baseCourse4)
-                                        courseDao.insertCourse(baseCourse5)
+                                        val homeworkDao = db.homeworkDao()
+
+                                        val englishId = courseDao.insertCourse(baseCourse).toInt()
+                                        homeworkDao.insertHomework(
+                                            HomeworkItem(
+                                                courseId = englishId,
+                                                title = "Read Act 1 of Hamlet",
+                                                details = "Summarize the main events and write a reflection paragraph.",
+                                                dueDay = "Monday"
+                                            )
+                                        )
+
+                                        val physicsId = courseDao.insertCourse(baseCourse2).toInt()
+                                        homeworkDao.insertHomework(
+                                            HomeworkItem(
+                                                courseId = physicsId,
+                                                title = "Grammar Practice – Past Perfect & Present Perfect Tense",
+                                                details = """
+            Complete Worksheet 5A from the grammar workbook.
+            Write 10 original sentences: 5 using the present perfect and 5 using the past perfect.
+        """.trimIndent(),
+                                                dueDay = "Tuesday"
+                                            )
+                                        )
+
+                                        val chemistryId = courseDao.insertCourse(baseCourse3).toInt()
+                                        homeworkDao.insertHomework(
+                                            HomeworkItem(
+                                                courseId = chemistryId,
+                                                title = "Lab Safety Assignment",
+                                                details = "List 10 lab safety rules and describe their importance.",
+                                                dueDay = "Wednesday"
+                                            )
+                                        )
+
+                                        val biologyId = courseDao.insertCourse(baseCourse4).toInt()
+                                        homeworkDao.insertHomework(
+                                            HomeworkItem(
+                                                courseId = biologyId,
+                                                title = "Cell Structure Review",
+                                                details = "Label the parts of a cell and write their functions.",
+                                                dueDay = "Thursday"
+                                            )
+                                        )
+
+                                        val algoId = courseDao.insertCourse(baseCourse5).toInt()
+                                        homeworkDao.insertHomework(
+                                            HomeworkItem(
+                                                courseId = algoId,
+                                                title = "Implement Bubble Sort",
+                                                details = "Write the bubble sort algorithm and test it on 5 arrays.",
+                                                dueDay = "Friday"
+                                            )
+                                        )
 
                                         withContext(Dispatchers.Main) {
                                             Toast.makeText(context, "Account created!", Toast.LENGTH_SHORT).show()
@@ -242,13 +292,29 @@ class MainActivity : ComponentActivity() {
 
 
                     "homework" -> selectedCourse?.let { course ->
+                        val homeworkDao = db.homeworkDao()
+                        val homeworkFlow = remember(course) {
+                            homeworkDao.getHomeworkForCourse(course.id)
+                        }
+                        val homeworkList by homeworkFlow.collectAsState(initial = emptyList())
+
                         HomeworkScreen(
                             course = course,
+                            homeworks = homeworkList,
                             onBack = {
                                 currentScreen = "courseDetail"
+                            },
+                            onToggleDone = { hw ->
+                                coroutineScope.launch(Dispatchers.IO) {
+                                    homeworkDao.updateHomework(hw.copy(isDone = !hw.isDone))
+                                }
+                            },
+                            onAddHomework = {
+                                currentScreen = "newHomework"
                             }
                         )
                     }
+
 
                     "meeting" -> selectedCourse?.let { course ->
                         MeetingScreen(
