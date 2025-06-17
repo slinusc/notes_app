@@ -14,11 +14,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.example.semester_project_app_dev.R
 import com.example.semester_project_app_dev.data.HomeworkItem
-import com.example.semester_project_app_dev.ui.PressableImage
-import com.example.semester_project_app_dev.ui.PressEffect
 
 @Composable
-fun CreateHomeworkScreen(
+fun AddHomeworkScreen(
     courseId: Int,
     onSave: (HomeworkItem) -> Unit,
     onCancel: () -> Unit
@@ -60,7 +58,7 @@ fun CreateHomeworkScreen(
         ) {
             Box(Modifier.fillMaxWidth()) {
                 Image(
-                    painter = painterResource(R.drawable.create_homework),
+                    painter = painterResource(R.drawable.edit_user),
                     contentDescription = "Create Homework Title",
                     modifier = Modifier
                         .padding(top = 60.dp, start = 15.dp)
@@ -85,7 +83,7 @@ fun CreateHomeworkScreen(
             TapedTextField(
                 value = title,
                 onValueChange = { title = it },
-                bgRes = R.drawable.hw_title, // reuse course name field style
+                bgRes = R.drawable.bg_field_name, // reuse course name field style
                 placeholder = "",
                 contentPadding = PaddingValues(start = 36.dp, top = 42.dp)
             )
@@ -103,7 +101,7 @@ fun CreateHomeworkScreen(
             TapedTextField(
                 value = details,
                 onValueChange = { details = it },
-                bgRes = R.drawable.details,
+                bgRes = R.drawable.bg_field_name, // ToDo: change to detais
                 placeholder = "",
                 contentPadding = PaddingValues(start = 36.dp, top = 38.dp)
             )

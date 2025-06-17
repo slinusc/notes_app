@@ -2,13 +2,7 @@ package com.example.semester_project_app_dev.ui
 
 import HomeworkCard
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
@@ -65,14 +59,31 @@ fun HomeworkScreen(
                 Spacer(modifier = Modifier.width(8.dp))
 
                 // Homework Counter
-                Image(
-                    painter = painterResource(R.drawable.hw_undone3),
-                    contentDescription = "Undone Homework",
+                Box(
                     modifier = Modifier
                         .weight(0.7f)
                         .fillMaxHeight(),
-                    contentScale = ContentScale.Fit
-                )
+                    contentAlignment = Alignment.Center
+                ) {
+                    Image(
+                        painter = painterResource(R.drawable.hw_undone),
+                        contentDescription = "Undone Homework",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Fit
+                    )
+
+                    Text(
+                        text = undoneCount.toString().padStart(2, '0'),
+                        modifier = Modifier.offset(y = (-5).dp), // shift text upward slightly
+                        style = MaterialTheme.typography.headlineSmall.copy(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 48.sp,
+                            color = Color(0xFFFF038D)
+                        )
+                    )
+                }
+
+
             }
 
             Spacer(Modifier.height(12.dp))

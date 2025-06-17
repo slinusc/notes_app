@@ -32,6 +32,7 @@ import kotlinx.coroutines.withContext
 import android.widget.Toast
 import com.example.semester_project_app_dev.data.HomeworkItem
 import com.example.semester_project_app_dev.state.rememberMenuState
+import com.example.semester_project_app_dev.ui.AddHomeworkScreen
 
 
 class MainActivity : ComponentActivity() {
@@ -186,11 +187,8 @@ class MainActivity : ComponentActivity() {
                                         homeworkDao.insertHomework(
                                             HomeworkItem(
                                                 courseId = physicsId,
-                                                title = "Grammar Practice – Past Perfect & Present Perfect Tense",
-                                                details = """
-            Complete Worksheet 5A from the grammar workbook.
-            Write 10 original sentences: 5 using the present perfect and 5 using the past perfect.
-        """.trimIndent(),
+                                                title = "Exercise 5",
+                                                details = "Solve problems 1-10.",
                                                 dueDay = "Tuesday"
                                             )
                                         )
@@ -315,6 +313,20 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
+                    "newHomework" -> selectedCourse?.let { course ->
+                        AddHomeworkScreen(
+                            courseId = course.id,
+                            onSave = { newHomeworkItem ->
+                                coroutineScope.launch {
+                                    db.homeworkDao().insertHomework(newHomeworkItem)
+                                    withContext(Dispatchers.Main) {
+                                        currentScreen = "homework"
+                                    }
+                                }
+                            },
+                            onCancel = { currentScreen = "homework" }
+                        )
+                    }
 
                     "meeting" -> selectedCourse?.let { course ->
                         MeetingScreen(
